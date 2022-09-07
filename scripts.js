@@ -93,7 +93,7 @@ const appendSvg = (data, idx) => {
         .data(data)
         .enter()
         .append("rect")
-        .attr("x", x(0) )
+        .attr("x", x(0))
         .attr("y", (d) => y(d.Category))
         .attr("width", d => x(d['This Year Sales']))
         .attr("height", y.bandwidth())
