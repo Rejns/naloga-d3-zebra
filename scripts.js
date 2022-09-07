@@ -1,58 +1,57 @@
-// set the dimensions and margins of the graph
-//const margin = {top: 30, right: 30, bottom: 70, left: 80};
-
 let maxSale = null;
 
-// Parse the Data
-d3.csv("assets/Multiples.csv", function(data) {
+d3.csv("assets/Multiples.csv", data => {
+    removeDollarSign(data);
     calcAvgPerCategory(data);
-    getMaxSales(data);
-    const groupsByDistrict = d3.group(data, d => d.District)
-    let idx = 0;
-    groupsByDistrict.forEach((group, key)=> {
-        g = document.createElement('div');
-        g.setAttribute("id", idx);
-        g.innerHTML = '<div class="title">' + key + '</div>';
-        document.getElementById('container').append(g);
-        sortDataByAverageCatSales(group);
-        appendSvg(idx, group, idx);
-        idx++;
-    });
+    calcMaxSale(data);
+    drawDataByGroup(data);
 });
 
-function calcAvgPerCategory(data) {
-    const groupsByCategory = d3.group(data, d => d.Category);
-    groupsByCategory.forEach(group => {
-        group.forEach((d) => {
-            d['This Year Sales'] = d['This Year Sales'].substring(1);
-        });
+const drawDataByGroup = (data) => {
+    let idx = 0;
+    const groupsByDistrict = d3.group(data, d => d.District);
 
-        let avg = d3.mean(group, d => +d['This Year Sales']);
-
-        group.forEach((d) => {
-            d.avg = avg;
-        });
+    groupsByDistrict.forEach((group, key) => {
+        sortByAvgCatSales(group);
+        appendDiv(key, idx);
+        appendSvg(group, idx);
+        idx++;
     });
 }
 
-function getMaxSales(data) {
+const appendDiv = (title, idx) => {
+    let g = document.createElement('div');
+    g.setAttribute("id", idx);
+    g.innerHTML = `<div class="title">${title}</div>`;
+    document.getElementById('container').append(g);
+}
+
+const removeDollarSign = (data) => {
+    data.forEach(d => d['This Year Sales'] = d['This Year Sales'].substring(1));
+}
+
+const calcAvgPerCategory = (data) => {
+    const groupsByCategory = d3.group(data, d => d.Category);
+    groupsByCategory.forEach(group => {
+        group.forEach((d) => d.avg = d3.mean(group, d => +d['This Year Sales']));
+    });
+}
+
+const calcMaxSale = (data) => {
     maxSale = d3.max(data, d => +d['This Year Sales']);
 }
 
-function sortDataByAverageCatSales(data) {
-    data.sort(function(a, b) {
-        return d3.descending(a.avg, b.avg);
-    });
+const sortByAvgCatSales = (data) => {
+    data.sort((a, b) => d3.descending(a.avg, b.avg));
 }
 
-function appendSvg(divId, data, idx) {
+const appendSvg = (data, idx) => {
     const max = d3.max(data, d => +d['This Year Sales']);
-
-    const margin = {top: 30, right: 15, bottom: 70, left: idx > 0 ? 0 : 100};
+    const margin = {top: 30, right: 15, bottom: 70, left: idx === 0 ? 100 : 0};
     const width = (idx === 0 ? (260 * max/maxSale) + 100 : (260 * max/maxSale)) - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
-    let svg = d3.select(document.getElementById(divId))
+    let svg = d3.select(document.getElementById(idx))
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -76,19 +75,18 @@ function appendSvg(divId, data, idx) {
     // Y axis
     const y = d3.scaleBand()
         .range([0, height])
-        .domain(data.map(function(d) { return d.Category; }))
+        .domain(data.map(d => d.Category))
         .padding(.1);
     svg.append("g")
         .call(d3.axisLeft(y).tickSize(0))
         .selectAll("text")
         .style('text-anchor','start')
-        .attr('transform', function() { return 'translate(-80,0)' });
+        .attr('transform', () => 'translate(-80,0)');
 
 
     if (idx > 0) {
         svg.selectAll("text").remove()
     }
-
 
     //Bars
     svg.selectAll("myRect")
@@ -96,8 +94,8 @@ function appendSvg(divId, data, idx) {
         .enter()
         .append("rect")
         .attr("x", x(0) )
-        .attr("y", function(d) { return y(d.Category); })
-        .attr("width", function(d) { return x(d['This Year Sales']); })
-        .attr("height", y.bandwidth() )
+        .attr("y", (d) => y(d.Category))
+        .attr("width", d => x(d['This Year Sales']))
+        .attr("height", y.bandwidth())
         .attr("fill", "#404040")
 }
