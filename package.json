@@ -1,0 +1,25 @@
+{
+  "name": "naloga-d3",
+  "version": "1.0.0",
+  "description": "Starter HTML, CSS, and JS files.",
+  "main": "scripts.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/margueriteroth/our-project-starter-d3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/margueriteroth/our-project-starter-d3/issues"
+  },
+  "homepage": "https://github.com/margueriteroth/our-project-starter-d3#readme",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}

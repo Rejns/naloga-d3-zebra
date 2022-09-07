@@ -1,14 +1,6 @@
 html,
 body {
-    font-family: -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Helvetica,
-        Arial,
-        sans-serif,
-        "Apple Color Emoji",
-        "Segoe UI Emoji",
-        "Segoe UI Symbol";
+    font-family: Helvetica;
     font-size: 16px;
     width: 100%;
     height: 100%;
@@ -16,70 +8,9 @@ body {
     margin: 0;
 }
 
-body {
-   line-height: 1.5;
-   -webkit-font-smoothing: antialiased;
-}
-
-body * {
-    box-sizing: border-box;
-}
-
-h1 {
-    font-size: 5.75em;
-    font-weight: 800;
-    line-height: 1;
-    position: relative;
-    margin-top: 0;
-}
-
-h1:after {
-    position: absolute;
-    content: "";
-    width: 5rem;
-    height: 6px;
-    background: #FFE600;
-    bottom: -3rem;
-    left: 0;
-}
-
-h2 {
-    margin-top: 7rem;
-}
-
-p {
-    line-height: 1.75;
-}
-
-a:visited {
-    color: currentColor;
-}
-
-button {
-    background: #FFE600;
-    padding: 0.75em 1.5em;
-    font-size: 0.85rem;
-    border: none;
-    font-weight: 600;
-    border-radius: 3px;
-    transition: 100ms all linear;
-}
-
-button:hover {
-    cursor: pointer;
-    background: black;
-    color: #FFE600;
-    transition: 100ms all linear;
-}
-
-button:focus {
-    outline: none;
-}
-
-.container {
+#container {
     max-width: 1200px;
     width: 100%;
-    margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -88,85 +19,9 @@ button:focus {
     padding-right: 4em;
 }
 
-.content {
-    flex: 2;
+#container > div:first-child .title {
+   margin-left: 100px;
 }
 
-.download-link {
-    margin-top: 2.5em;
-}
 
-.celebration-gif {
-    width: 100%;
-    max-width: 480px;
-}
-
-@media(max-width: 920px) {
-    .container {
-        padding-top: 5em;
-        padding-bottom: 5em;
-        flex-direction: column;
-    }
-
-    .chart {
-        margin-top: 2em;
-    }
-}
-
-@media(max-width: 600px) {
-    .container {
-        padding-left: 1.5em;
-        padding-right: 1.5em;
-    }
-
-    h1 {
-        font-size: 3em;
-    }
-}
-
-/* Chart styles */
-
-.chart {
-    flex: 3;
-    display: flex;
-    justify-content: flex-end;
-}
-
-#wrapper {
-    position: relative;
-}
-
-.axis path {
-    opacity: 0.25;
-}
-
-.tick line {
-    opacity: 0.25;
-}
-
-#tooltip {
-    opacity: 0;
-    position: absolute;
-    top: -10px;
-    left: 0;
-    padding-left: 0.75em;
-    padding-right: 0.75em;
-    padding-top: 0.075em;
-    padding-bottom: 0.1em;
-    text-align: center;
-    border: 1px solid lightgray;
-    border-radius: 3px;
-    background: white;
-    z-index: 1;
-    transition: all 0.2s ease-out;
-    pointer-events: none;
-}
-
-rect {
-    fill: #FFE600;
-}
-
-rect:hover {
-    fill: black;
-}
 

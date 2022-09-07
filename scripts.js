@@ -1,152 +1,103 @@
-// Following steps order and formatting Amelia Wattenberger outlines
-// in her Fullstack D3 book. This structure helps organize
-// all the steps we have to take in d3!
+// set the dimensions and margins of the graph
+//const margin = {top: 30, right: 30, bottom: 70, left: 80};
 
-// 1. Access data
-const dataset = [
-    {
-        name: "puppies",
-        quantity: 10
-    },
-    {
-        name: "kittens",
-        quantity: 8
-    },
-    {
-        name: "bananas",
-        quantity: 12
-    },
-    {
-        name: "pizzas",
-        quantity: 8
-    },
-    {
-        name: "avocados",
-        quantity: 3
-    },
-    {
-        name: "lasagnas",
-        quantity: 4
-    },
-]
+let maxSale = null;
 
-const yAccessor = d => d.quantity
-const xAccessor = d => d.name
+// Parse the Data
+d3.csv("assets/Multiples.csv", function(data) {
+    calcAvgPerCategory(data);
+    getMaxSales(data);
+    const groupsByDistrict = d3.group(data, d => d.District)
+    let idx = 0;
+    groupsByDistrict.forEach((group, key)=> {
+        g = document.createElement('div');
+        g.setAttribute("id", idx);
+        g.innerHTML = '<div class="title">' + key + '</div>';
+        document.getElementById('container').append(g);
+        sortDataByAverageCatSales(group);
+        appendSvg(idx, group, idx);
+        idx++;
+    });
+});
 
-// 2. Create chart dimensions
-let dimensions = {
-    width: 500,
-    height: 400,
-    margin: {
-        top: 15,
-        right: 15,
-        bottom: 60,
-        left: 40,
-    },
+function calcAvgPerCategory(data) {
+    const groupsByCategory = d3.group(data, d => d.Category);
+    groupsByCategory.forEach(group => {
+        group.forEach((d) => {
+            d['This Year Sales'] = d['This Year Sales'].substring(1);
+        });
+
+        let avg = d3.mean(group, d => +d['This Year Sales']);
+
+        group.forEach((d) => {
+            d.avg = avg;
+        });
+    });
 }
 
-dimensions.boundedWidth = dimensions.width
-    - dimensions.margin.left
-    - dimensions.margin.right
-dimensions.boundedHeight = dimensions.height
-    - dimensions.margin.top
-    - dimensions.margin.bottom
-
-// 3. Draw canvas
-
-const wrapper = d3.select("#wrapper")
-    .append("svg")
-    .attr("width", dimensions.width)
-    .attr("height", dimensions.height)
-
-const bounds = wrapper.append("g")
-    .style("transform", `translate(${
-        dimensions.margin.left
-        }px, ${
-        dimensions.margin.top
-        }px)`)
-
-// 4. Create scales
-
-const xScale = d3.scaleBand()
-    .domain(dataset.map(d => d.name))
-    .range([0, dimensions.boundedWidth])
-    .padding(0.2)
-
-const yScale = d3.scaleLinear()
-    .domain([0, d3.max(dataset, yAccessor)])
-    .range([dimensions.boundedHeight, 0])
-
-// 5. Draw data
-
-bounds.selectAll("rect")
-    .data(dataset)
-    .enter()
-    .append("rect")
-    .attr('x', d => xScale(d.name))
-    .attr("y", d => yScale(yAccessor(d)))
-    .attr('width', d => xScale.bandwidth())
-    .attr("height", d => dimensions.boundedHeight
-        - yScale(d.quantity)
-    )
-
-// 6. Draw peripherals
-
-const xAxisGenerator = d3.axisBottom()
-    .scale(xScale)
-
-const xAxis = bounds.append("g")
-    .call(xAxisGenerator)
-    .attr("class", "axis x-axis")
-    .style("transform", `translateY(${dimensions.boundedHeight}px)`)
-
-const xAxisLabel = xAxis.append("text")
-    .attr("x", dimensions.boundedWidth / 2)
-    .attr("y", dimensions.margin.bottom - 10)
-    .style("font-size", "1.4em")
-    .text("Our chart of amazing things")
-    .attr("fill", "black")
-
-const yAxisGenerator = d3.axisLeft()
-    .scale(yScale)
-
-const yAxis = bounds.append("g")
-    .attr("class", "axis y-axis")
-    .call(yAxisGenerator)
-
-const yAxisLabel = yAxis.append("text")
-    .attr("x", -dimensions.boundedHeight / 2)
-    .attr("y", -dimensions.margin.left + 10)
-    .style("transform", "rotate(-90deg)")
-    .style("text-anchor", "middle")
-    .style("font-size", "1.4em")
-    .text("Quantity")
-    .attr("fill", "black")
-
-
-// 7. Set up interactions
-
-bounds.selectAll("rect")
-    .on("mouseenter", onMouseEnter)
-    .on("mouseleave", onMouseLeave)
-
-const tooltip = d3.select("#tooltip")
-function onMouseEnter(datum) {
-    tooltip.text(yAccessor(datum) + " " + datum.name)
-
-    const x = (xScale.bandwidth() / 2)
-        + xScale(datum.name)
-        + dimensions.margin.left
-    const y = yScale(yAccessor(datum))
-        + dimensions.margin.top
-
-    tooltip.style("transform", `translate(`
-        + `calc(-50% + ${x}px),`
-        + `calc(-100% + ${y}px)`
-        + `)`)
-    tooltip.style("opacity", 1)
+function getMaxSales(data) {
+    maxSale = d3.max(data, d => +d['This Year Sales']);
 }
 
-function onMouseLeave() {
-    tooltip.style("opacity", 0)
+function sortDataByAverageCatSales(data) {
+    data.sort(function(a, b) {
+        return d3.descending(a.avg, b.avg);
+    });
+}
+
+function appendSvg(divId, data, idx) {
+    const max = d3.max(data, d => +d['This Year Sales']);
+
+    const margin = {top: 30, right: 15, bottom: 70, left: idx > 0 ? 0 : 100};
+    const width = (idx === 0 ? (260 * max/maxSale) + 100 : (260 * max/maxSale)) - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+
+    let svg = d3.select(document.getElementById(divId))
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+
+    // X axis
+    const x = d3.scaleLinear()
+        .domain([0, max])
+        .range([0, width]);
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).tickSize(0))
+        .call(g => g.select(".domain").remove())
+        .selectAll("text").remove()
+        .attr("transform", "translate(-10,0)rotate(-45)")
+        .style("text-anchor", "end");
+
+    // Y axis
+    const y = d3.scaleBand()
+        .range([0, height])
+        .domain(data.map(function(d) { return d.Category; }))
+        .padding(.1);
+    svg.append("g")
+        .call(d3.axisLeft(y).tickSize(0))
+        .selectAll("text")
+        .style('text-anchor','start')
+        .attr('transform', function() { return 'translate(-80,0)' });
+
+
+    if (idx > 0) {
+        svg.selectAll("text").remove()
+    }
+
+
+    //Bars
+    svg.selectAll("myRect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", x(0) )
+        .attr("y", function(d) { return y(d.Category); })
+        .attr("width", function(d) { return x(d['This Year Sales']); })
+        .attr("height", y.bandwidth() )
+        .attr("fill", "#404040")
 }
